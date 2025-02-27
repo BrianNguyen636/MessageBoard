@@ -1,0 +1,35 @@
+DROP TABLE IF EXISTS Threads
+CREATE TABLE Threads(
+	threadID int identity PRIMARY KEY,
+	title varchar(255) NOT NULL,
+	time DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+DROP TABLE IF EXISTS Users
+CREATE TABLE Users (
+	userID int identity PRIMARY KEY,
+	username varchar(255) NOT NULL,
+	password varchar(255) NOT NULL,
+);
+DROP TABLE IF EXISTS Posts
+CREATE TABLE Posts (
+	postID int identity PRIMARY KEY,
+	threadID int NOT NULL,
+	userID int NOT NULL,
+	replyID int DEFAULT NULL,
+	body varchar(255) NOT NULL,
+	time DATETIME DEFAULT CURRENT_TIMESTAMP,
+);
+
+ALTER TABLE POSTS
+ADD CONSTRAINT fk_threadID
+FOREIGN KEY (threadID) REFERENCES Threads(threadID)
+
+ALTER TABLE POSTS
+ADD CONSTRAINT fk_userID
+FOREIGN KEY (userID) REFERENCES Users(userID)
+
+ALTER TABLE POSTS
+ADD CONSTRAINT fk_replyID
+FOREIGN KEY (replyID) REFERENCES Posts(postID)
+
+
