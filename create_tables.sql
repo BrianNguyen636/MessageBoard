@@ -1,8 +1,10 @@
+ALTER TABLE Posts
+DROP CONSTRAINT fk_replyID, fk_threadID, fk_userID
+
 DROP TABLE IF EXISTS Threads
 CREATE TABLE Threads(
 	threadID int identity PRIMARY KEY,
 	title varchar(255) NOT NULL,
-	time DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 DROP TABLE IF EXISTS Users
 CREATE TABLE Users (
