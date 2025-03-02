@@ -55,18 +55,18 @@ export default class Database {
     return result.rowsAffected[0];
   }
 
-  async readAll() {
+  async readAll(table) {
     const request = this.poolconnection.request();
-    const result = await request.query(`SELECT * FROM Person`);
+    const result = await request.query(`SELECT * FROM ` + table);
 
     return result.recordsets[0];
   }
 
-  async read(id) {
+  async read(id, table) {
     const request = this.poolconnection.request();
     const result = await request
       .input('id', sql.Int, +id)
-      .query(`SELECT * FROM Person WHERE id = @id`);
+      .query(`SELECT * FROM ` + table + ` WHERE id = @id`);
 
     return result.recordset[0];
   }

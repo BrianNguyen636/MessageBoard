@@ -5,12 +5,12 @@ if(process.env.NODE_ENV === 'development') {
 }
 
 // TIP: Port must be a number, not a string!
-const server = 'tcss545db.mysql.database.windows.net';
-const database = 'tcss545db';
-const port = 1433;
-const type = 'azure-active-directory-default'
-const user = 'admin545';
-const password = 'uPjfeuow83';
+const server = tcss545db.mysql;
+const database = process.env.AZURE_SQL_DATABASE;
+const port = +process.env.AZURE_SQL_PORT;
+const type = process.env.AZURE_SQL_AUTHENTICATIONTYPE;
+const user = process.env.AZURE_SQL_USER;
+const password = process.env.AZURE_SQL_PASSWORD;
 
 export const noPasswordConfig = {
   server,
