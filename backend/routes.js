@@ -1,22 +1,24 @@
 import express from 'express';
-import { 
-  passwordConfig as SQLAuthentication, 
-  noPasswordConfig as PasswordlessConfig 
-} from './config.js';
-import { createDatabaseConnection } from './database.js';
+import pool from './database.js';
 
 const router = express.Router();
 router.use(express.json());
 
-const database = await createDatabaseConnection(SQLAuthentication);
+try {
+    const connection = await pool.getConnection();
+    console.log('Connected to MySQL database!');
+    connection.release()
+} catch (error) {
+    console.error('Error connecting to MySQL:', error.message);
+}
 
-router.get('/', async (req, res) => {
+router.get('/Users', async (req, res) => {
   try {
-    // Return a list of users
-
-    const users = await database.readAll();
-    console.log(`users: ${JSON.stringify(users)}`);
-    res.status(200).json(users);
+    const connection = await pool.getConnection();
+    const [rows] = connection.execute('SELECT * FROM Users')
+    console.log(JSON.stringify(rows))
+    res.json(JSON.stringify(rows))
+    connection.release();
   } catch (err) {
     res.status(500).json({ error: err?.message });
   }
