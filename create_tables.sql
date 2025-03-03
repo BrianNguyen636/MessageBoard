@@ -8,13 +8,13 @@ CREATE TABLE Threads(
 );
 DROP TABLE IF EXISTS Users
 CREATE TABLE Users (
-	userID int identity PRIMARY KEY,
+	userID int NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	username varchar(255) NOT NULL,
 	password varchar(255) NOT NULL,
 );
 DROP TABLE IF EXISTS Posts
 CREATE TABLE Posts (
-	postID int identity PRIMARY KEY,
+	postID int NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	threadID int NOT NULL,
 	userID int NOT NULL,
 	replyID int DEFAULT NULL,
