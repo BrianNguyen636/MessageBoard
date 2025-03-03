@@ -13,19 +13,6 @@ try {
     console.error('Error connecting to MySQL:', error.message);
 }
 
-//Make the user table
-router.post('/maketable/users', async (req, res) => {
-    try {
-        const connection = await pool.getConnection();
-        await connection.execute('DROP TABLE IF EXISTS Users;')
-        const rows = await connection.execute('CREATE TABLE Users(userID int NOT NULL AUTO_INCREMENT PRIMARY KEY, username varchar(255) NOT NULL,password varchar(255) NOT NULL)')
-        res.send(JSON.stringify(rows[0]))
-        connection.release();
-    } catch (err) {
-        res.status(500).json({ error: err?.message });
-    }
-});
-
 
 //get all users
 router.get('/users', async (req, res) => {
@@ -98,7 +85,7 @@ router.delete('/users/:id', async (req, res) => {
 router.get('/example', async (req, res) => {
     try {
         const connection = await pool.getConnection();
-        const rows = awaitconnection.execute('')
+        const rows = connection.execute('');
         res.send(JSON.stringify(rows[0]))
         connection.release();
     } catch (err) {
