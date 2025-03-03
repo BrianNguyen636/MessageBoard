@@ -3,7 +3,7 @@ DROP CONSTRAINT fk_replyID, fk_threadID, fk_userID
 
 DROP TABLE IF EXISTS Threads
 CREATE TABLE Threads(
-	threadID int identity PRIMARY KEY,
+	threadID int NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	title varchar(255) NOT NULL,
 );
 DROP TABLE IF EXISTS Users

@@ -8,7 +8,7 @@ INSERT INTO Users VALUES
 	('KidoHyde', '123'),
 	('RockHoward', 'fullthrottle'),
 
-	('JohnSmith', 'john123'),
+	('TestUser', 'test'),
 	('Langston','markanthony'),
 	('N2','playcvbla'),
 	('Barkley','astlibra'),
