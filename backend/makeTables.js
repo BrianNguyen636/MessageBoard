@@ -7,7 +7,7 @@ async function main() {
 
         // LEAVE COMMENTED OUT IF RUNNING FOR THE FIRST TIME
         // IF REMAKING THE TABLES UNCOMMENT
-        // await dropConstraints(connection);
+        await dropConstraints(connection);
         await makeUsers(connection);
         console.log('User table created.')
         await makeThreads(connection);

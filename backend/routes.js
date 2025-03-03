@@ -80,6 +80,41 @@ router.delete('/users/:id', async (req, res) => {
     }
 });
 
+//get all threads
+router.get('/threads', async (req, res) => {
+    try {
+      const connection = await pool.getConnection();
+      const rows = await connection.execute('SELECT * FROM Threads')
+      res.send(JSON.stringify(rows[0]))
+      connection.release();
+    } catch (err) {
+      res.status(500).json({ error: err?.message });
+    }
+});
+
+  //get all posts from a thread
+  router.get('/threads/:id/posts', async (req, res) => {
+    try {
+      const connection = await pool.getConnection();
+      const rows = await connection.execute('SELECT * FROM Posts where threadID = ' + req.params.id)
+      res.send(JSON.stringify(rows[0]))
+      connection.release();
+    } catch (err) {
+      res.status(500).json({ error: err?.message });
+    }
+});
+
+  //get all posts
+router.get('/posts', async (req, res) => {
+    try {
+      const connection = await pool.getConnection();
+      const rows = await connection.execute('SELECT * FROM Posts')
+      res.send(JSON.stringify(rows[0]))
+      connection.release();
+    } catch (err) {
+      res.status(500).json({ error: err?.message });
+    }
+});
 
 
 router.get('/example', async (req, res) => {
