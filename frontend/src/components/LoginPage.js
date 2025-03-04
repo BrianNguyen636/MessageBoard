@@ -15,48 +15,48 @@ function Login() {
 
   function handleSubmit(event) {
     event.preventDefault();
-    console.log("HIss")
-    axios.get("http://localhost:3000/users/2", {
-      withCredentials: true,  // ✅ Ensure this matches backend CORS settings
-      headers: {},  // ✅ Empty headers to test if backend blocks defaults
-    })
-      .then(response => console.log(response.data))
-      .catch(error => console.error("Error fetching user:", error));
+    console.log("HIsss")
+    // axios.get("http://localhost:3000/users/2", {
+    //   withCredentials: true,  //  Ensure this matches backend CORS settings
+    //   headers: {},  //  Empty headers to test if backend blocks defaults
+    // })
+    //   .then(response => console.log(response.data))
+    //   .catch(error => console.error("Error fetching user:", error));
     
 
     // Send the username and password to the server
-    // axios
-    //   .post(
-    //     "http://localhost:3000/login",  // 
-    //     {
-    //       username: enteredValues.username,
-    //       password: enteredValues.password,
-    //     },
-    //     { withCredentials: true, }
-    //   )
-    //   .then((response) => {
-    //     // Handle the server response (success or error) here
-    //     console.log(response.data); // Log the response from the server
-
-    //     if (response.status === 400) {
-
-    //       console.error(response.data.message);
-    //       // Handle conflict (user already exists) - display an error message to the user
-    //     } else if (response.status === 200) {
-       
-    //       // Redirect to the homepage on successful signup
-    //       navigate("..");
-    //       console.log(response.data.message);
-
-    //     } else {
-    //       // Handle other error cases
-    //       console.error("Signup failed");
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     // Handle errors here
-    //     console.error("Error submitting login:", error);
-    //   });
+    axios
+      .post(
+        "http://localhost:3000/login",
+        {
+          username: enteredValues.username,
+          password: enteredValues.password,
+        },
+        { withCredentials: true }
+      )
+      .then((response) => {
+        console.log(response.data); // Log the response from the server
+    
+        if (response.status === 200) {
+          console.log("Log in successfully");
+          navigate("..");
+        } else {
+          console.error("Unexpected response:", response);
+        }
+      })
+      .catch((error) => {
+        //  Check if the response exists before accessing it
+        if (error.response) {
+          if (error.response.status === 404) {
+            console.log("Log in failed"); //  This will now show in the console
+          } else {
+            console.error("Unexpected error:", error.response.status, error.response.data);
+          }
+        } else {
+          console.error("Error submitting login:", error.message);
+        }
+    });
+  
   }
 
   function handleInputChange(identifier, event) {
