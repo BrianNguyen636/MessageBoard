@@ -55,6 +55,18 @@ router.get('/login', async (req, res) => {
     }
 });
 
+//get all posts by a user by their id
+router.get('/users/:id/posts', async (req, res) => {
+    try {
+      const connection = await pool.getConnection();
+      const [rows] = await connection.execute('SELECT * FROM Posts where userID=' + req.params.id)
+      res.send(JSON.stringify(rows[0]))
+      connection.release();
+    } catch (err) {
+      res.status(500).json({ error: err?.message });
+    }
+});
+
 //CREATE USER FROM BODY
 router.post('/users', async (req, res) => {
     try {
@@ -80,6 +92,8 @@ router.delete('/users/:id', async (req, res) => {
     }
 });
 
+
+
 //get all threads
 router.get('/threads', async (req, res) => {
     try {
@@ -92,17 +106,67 @@ router.get('/threads', async (req, res) => {
     }
 });
 
-  //get all posts from a thread
-  router.get('/threads/:id/posts', async (req, res) => {
+  //get a thread by id
+  router.get('/threads/:id', async (req, res) => {
     try {
       const connection = await pool.getConnection();
-      const rows = await connection.execute('SELECT * FROM Posts where threadID = ' + req.params.id)
+      const rows = await connection.execute('SELECT * FROM Threads where threadID = ' + req.params.id)
       res.send(JSON.stringify(rows[0]))
       connection.release();
     } catch (err) {
       res.status(500).json({ error: err?.message });
     }
 });
+
+  //get all posts from a thread
+  router.get('/threads/:id/posts', async (req, res) => {
+    try {
+      const connection = await pool.getConnection();
+      const rows = await connection.execute('SELECT * FROM Posts where threadID = ' + req.params.id + " ORDER BY time asc")
+      res.send(JSON.stringify(rows[0]))
+      connection.release();
+    } catch (err) {
+      res.status(500).json({ error: err?.message });
+    }
+});
+
+//MAKE A THREAD with TITLE, userID, text
+router.post('/threads', async (req, res) => {
+    try {
+        const body = req.body
+        const title = body.title
+        const userID = body.userID
+        const text = body.body
+        const connection = await pool.getConnection();
+
+        const threadRows = await connection.execute(`INSERT INTO Threads (title) VALUES (${title})`)
+        const threadID = threadRows[0].insertId
+
+        const queryString = `INSERT INTO Posts (threadID, userID, body) VALUES 
+            ('${threadID}', '${userID}','${text}')`
+        const rows = await connection.execute(queryString);
+        res.header({threadID: threadID})
+        res.send(JSON.stringify(rows[0]))
+        connection.release();
+    } catch (err) {
+        res.status(500).json({ error: err?.message });
+    }
+});
+
+//Delete a thread by ID
+router.delete('/threads/:id', async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+        await connection.execute(`DELETE FROM Posts WHERE threadID = ${req.params.id}`)
+        const queryString = `DELETE FROM Threads WHERE threadID = ${req.params.id}`
+        const rows = await connection.execute(queryString);
+        res.send(JSON.stringify(rows[0]))
+        connection.release();
+    } catch (err) {
+        res.status(500).json({ error: err?.message });
+    }
+});
+
 
   //get all posts
 router.get('/posts', async (req, res) => {
@@ -116,11 +180,65 @@ router.get('/posts', async (req, res) => {
     }
 });
 
+//Get post by id
+router.get('/posts/:id', async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+        const rows = connection.execute('SELECT * FROM Posts WHERE postID = ' + req.params.id);
+        res.send(JSON.stringify(rows[0]))
+        connection.release();
+    } catch (err) {
+        res.status(500).json({ error: err?.message });
+    }
+});
+
+//Get all posts that have replied to the ID'd post
+router.get('/posts/reply/:id', async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+        const rows = connection.execute('SELECT * FROM Posts WHERE replyID = ' + req.params.id);
+        res.send(JSON.stringify(rows[0]))
+        connection.release();
+    } catch (err) {
+        res.status(500).json({ error: err?.message });
+    }
+});
+//MAKE A POST with userID, replyID, threadID, and body.
+router.post('/posts', async (req, res) => {
+    try {
+        const body = req.body
+        const userID = body.userID
+        const replyID = body.replyID
+        const text = body.body
+        const threadID = body.threadID
+        const connection = await pool.getConnection();
+        const queryString = `INSERT INTO Posts (threadID, userID, replyID, body) VALUES 
+            ('${threadID}', '${userID}','${replyID}','${text}')`
+        const rows = await connection.execute(queryString);
+        res.send(JSON.stringify(rows[0]))
+        connection.release();
+    } catch (err) {
+        res.status(500).json({ error: err?.message });
+    }
+});
+
+//Delete a post by ID
+router.delete('/posts/:id', async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+        const queryString = `DELETE FROM Posts WHERE postID = ${req.params.id}`
+        const rows = await connection.execute(queryString);
+        res.send(JSON.stringify(rows[0]))
+        connection.release();
+    } catch (err) {
+        res.status(500).json({ error: err?.message });
+    }
+});
 
 router.get('/example', async (req, res) => {
     try {
         const connection = await pool.getConnection();
-        const rows = connection.execute('');
+        const rows = await connection.execute('');
         res.send(JSON.stringify(rows[0]))
         connection.release();
     } catch (err) {
