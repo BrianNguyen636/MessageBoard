@@ -15,48 +15,48 @@ function Login() {
 
   function handleSubmit(event) {
     event.preventDefault();
-
-    // Check if the password is valid
-    if (enteredValues.password && !enteredValues.password.includes("!")) {
-      setIsPasswordValid(false);
-      return; // Stop the submission if the password is not valid
-    } else {
-      setIsPasswordValid(true);
-    }
+    console.log("HIss")
+    axios.get("http://localhost:3000/users/2", {
+      withCredentials: true,  // ✅ Ensure this matches backend CORS settings
+      headers: {},  // ✅ Empty headers to test if backend blocks defaults
+    })
+      .then(response => console.log(response.data))
+      .catch(error => console.error("Error fetching user:", error));
+    
 
     // Send the username and password to the server
-    axios
-      .post(
-        "localhost:3000/login",
-        {
-          username: enteredValues.username,
-          password: enteredValues.password,
-        },
-        { withCredentials: true }
-      )
-      .then((response) => {
-        // Handle the server response (success or error) here
-        console.log(response.data); // Log the response from the server
+    // axios
+    //   .post(
+    //     "http://localhost:3000/login",  // 
+    //     {
+    //       username: enteredValues.username,
+    //       password: enteredValues.password,
+    //     },
+    //     { withCredentials: true, }
+    //   )
+    //   .then((response) => {
+    //     // Handle the server response (success or error) here
+    //     console.log(response.data); // Log the response from the server
 
-        if (response.status === 400) {
+    //     if (response.status === 400) {
 
-          console.error(response.data.message);
-          // Handle conflict (user already exists) - display an error message to the user
-        } else if (response.status === 200) {
+    //       console.error(response.data.message);
+    //       // Handle conflict (user already exists) - display an error message to the user
+    //     } else if (response.status === 200) {
        
-          // Redirect to the homepage on successful signup
-          navigate("..");
-          console.log(response.data.message);
+    //       // Redirect to the homepage on successful signup
+    //       navigate("..");
+    //       console.log(response.data.message);
 
-        } else {
-          // Handle other error cases
-          console.error("Signup failed");
-        }
-      })
-      .catch((error) => {
-        // Handle errors here
-        console.error("Error submitting login:", error);
-      });
+    //     } else {
+    //       // Handle other error cases
+    //       console.error("Signup failed");
+    //     }
+    //   })
+    //   .catch((error) => {
+    //     // Handle errors here
+    //     console.error("Error submitting login:", error);
+    //   });
   }
 
   function handleInputChange(identifier, event) {
