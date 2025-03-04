@@ -1,8 +1,13 @@
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 
+// Gets the environment data from the .env file.
 dotenv.config();
 
+
+/**
+ * MySQL connection from Azure
+ */
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
