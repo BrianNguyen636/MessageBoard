@@ -2,7 +2,6 @@ import express from 'express';
 import pool from './database.js';
 
 
-
 const router = express.Router();
 router.use(express.json());
 
@@ -229,8 +228,22 @@ router.delete('/users/:id', async (req, res) => {
 });
 
 
+/**
+ * @swagger
+ * tags:
+ *  name: Threads
+ * /threads:
+ *  get:
+ *      summary: Get all Threads
+ *      tags: [Threads]
+ *      responses:
+ *          200:
+ *              description: The list of thread objects
+ *          500:
+ *              description: Error
+ *              
+ */
 
-//get all threads
 router.get('/threads', async (req, res) => {
     try {
       const connection = await pool.getConnection();
@@ -241,20 +254,64 @@ router.get('/threads', async (req, res) => {
       res.status(500).json({ error: err?.message });
     }
 });
-
-  //get a thread by id
+/**
+ * @swagger
+ * /threads/{id}:
+ *  get:
+ *      summary: Get a thread by its ID
+ *      parameters:
+ *        - in: path
+ *          name: id
+ *          type: integer
+ *          required: true
+ *          description: The ID of the thread
+ *              
+ *      tags: [Threads]
+ *      responses:
+ *          200:
+ *              description: The thread object
+ *          404:
+ *              description: Thread not found
+ *          500:
+ *              description: Error
+ *              
+ */
   router.get('/threads/:id', async (req, res) => {
     try {
-      const connection = await pool.getConnection();
-      const rows = await connection.execute('SELECT * FROM Threads where threadID = ' + req.params.id)
-      res.send(JSON.stringify(rows[0]))
-      connection.release();
+        const connection = await pool.getConnection();
+        const rows = await connection.execute('SELECT * FROM Threads where threadID = ' + req.params.id)
+        if (rows[0].length == 0) {
+            res.status(404).json({ error: 'Thread does not exist' });
+        } else {
+            res.status(200).json(rows[0][0])
+        }
+        connection.release();
     } catch (err) {
       res.status(500).json({ error: err?.message });
     }
 });
-
-  //get all posts from a thread
+/**
+ * @swagger
+ * /threads/{id}/posts:
+ *  get:
+ *      summary: Get a thread's posts by its ID
+ *      parameters:
+ *        - in: path
+ *          name: id
+ *          type: integer
+ *          required: true
+ *          description: The ID of the thread
+ *              
+ *      tags: [Threads]
+ *      responses:
+ *          200:
+ *              description: The list of posts in the thread
+ *          404:
+ *              description: Thread not found
+ *          500:
+ *              description: Error
+ *              
+ */
   router.get('/threads/:id/posts', async (req, res) => {
     try {
       const connection = await pool.getConnection();
@@ -266,7 +323,36 @@ router.get('/threads', async (req, res) => {
     }
 });
 
-//MAKE A THREAD with TITLE, userID, text
+/**
+ * @swagger
+ * /threads:
+ *  post:
+ *      summary: Create a thread and opening post
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          userID:
+ *                              type: integer
+ *                          title:
+ *                              type: string
+ *                          body:
+ *                              type: string
+ *                      required:
+ *                          - title
+ *                          - userID
+ *                          - body
+ *      tags: [Threads]
+ *      responses:
+ *          200:
+ *              description: Returns the userID of the newly created user
+ *          404:
+ *              description: Failed login
+ *              
+ */
 router.post('/threads', async (req, res) => {
     try {
         const body = req.body
@@ -275,36 +361,66 @@ router.post('/threads', async (req, res) => {
         const text = body.body
         const connection = await pool.getConnection();
 
-        const threadRows = await connection.execute(`INSERT INTO Threads (title) VALUES (${title})`)
+        const threadRows = await connection.execute(`INSERT INTO Threads (title) VALUES ('${title}')`)
         const threadID = threadRows[0].insertId
 
         const queryString = `INSERT INTO Posts (threadID, userID, body) VALUES 
             ('${threadID}', '${userID}','${text}')`
         const rows = await connection.execute(queryString);
-        res.header({threadID: threadID})
-        res.send(JSON.stringify(rows[0]))
+        res.status(200).send({postID: rows[0].insertId, threadID: threadID})
         connection.release();
     } catch (err) {
         res.status(500).json({ error: err?.message });
     }
 });
-
-//Delete a thread by ID
+/**
+ * @swagger
+ * /threads/{id}:
+ *  delete:
+ *      summary: Deletes a thread by its ID
+ *      parameters:
+ *        - in: path
+ *          name: id
+ *          type: integer
+ *          required: true
+ *          description: The ID of the thread
+ *              
+ *      tags: [Threads]
+ *      responses:
+ *          200:
+ *              description: Success message
+ *          500:
+ *              description: Error
+ *              
+ */
 router.delete('/threads/:id', async (req, res) => {
     try {
         const connection = await pool.getConnection();
         await connection.execute(`DELETE FROM Posts WHERE threadID = ${req.params.id}`)
         const queryString = `DELETE FROM Threads WHERE threadID = ${req.params.id}`
         const rows = await connection.execute(queryString);
-        res.send(JSON.stringify(rows[0]))
+        res.status(200).send({Success: "Thread " + req.params.id + " successfully deleted"})
         connection.release();
     } catch (err) {
         res.status(500).json({ error: err?.message });
     }
 });
 
-
-  //get all posts
+/**
+ * @swagger
+ * tags:
+ *  name: Posts
+ * /posts:
+ *  get:
+ *      summary: Get all Posts
+ *      tags: [Posts]
+ *      responses:
+ *          200:
+ *              description: The list of post objects
+ *          500:
+ *              description: Error
+ *              
+ */
 router.get('/posts', async (req, res) => {
     try {
       const connection = await pool.getConnection();
@@ -315,31 +431,110 @@ router.get('/posts', async (req, res) => {
       res.status(500).json({ error: err?.message });
     }
 });
-
-//Get post by id
+/**
+ * @swagger
+ * /posts/{id}:
+ *  get:
+ *      summary: Get a post by its ID
+ *      parameters:
+ *        - in: path
+ *          name: id
+ *          type: integer
+ *          required: true
+ *          description: The ID of the post
+ *              
+ *      tags: [Posts]
+ *      responses:
+ *          200:
+ *              description: The post object
+ *          404:
+ *              description: Post not found
+ *          500:
+ *              description: Error
+ *              
+ */
 router.get('/posts/:id', async (req, res) => {
     try {
         const connection = await pool.getConnection();
-        const rows = connection.execute('SELECT * FROM Posts WHERE postID = ' + req.params.id);
-        res.send(JSON.stringify(rows[0]))
+        const rows = await connection.execute(`SELECT * FROM Posts WHERE postID = ${req.params.id}`);
+        if (rows[0].length == 0) {
+            res.status(404).json({ error: 'Post does not exist' });
+        } else {
+            res.status(200).json(rows[0][0])
+        }
         connection.release();
     } catch (err) {
         res.status(500).json({ error: err?.message });
     }
 });
-
-//Get all posts that have replied to the ID'd post
+/**
+ * @swagger
+ * /posts/reply/{id}:
+ *  get:
+ *      summary: Get all posts that have replied to the ID'd post
+ *      parameters:
+ *        - in: path
+ *          name: id
+ *          type: integer
+ *          required: true
+ *          description: The ID of the post
+ *              
+ *      tags: [Posts]
+ *      responses:
+ *          200:
+ *              description: The list of posts
+ *          404:
+ *              description: Post not found
+ *          500:
+ *              description: Error
+ *              
+ */
 router.get('/posts/reply/:id', async (req, res) => {
     try {
         const connection = await pool.getConnection();
-        const rows = connection.execute('SELECT * FROM Posts WHERE replyID = ' + req.params.id);
-        res.send(JSON.stringify(rows[0]))
+        const rows = await connection.execute(`SELECT * FROM Posts WHERE replyID = ${req.params.id}`);
+        if (rows[0].length == 0) {
+            res.status(404).json({ error: 'Post does not exist' });
+        } else {
+            res.status(200).json(rows[0])
+        }
         connection.release();
     } catch (err) {
         res.status(500).json({ error: err?.message });
     }
 });
-//MAKE A POST with userID, replyID, threadID, and body.
+/**
+ * @swagger
+ * /posts:
+ *  post:
+ *      summary: Create a post in a thread
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          threadID:
+ *                              type: integer
+ *                          userID:
+ *                              type: integer
+ *                          replyID:
+ *                              type: integer
+ *                          body:
+ *                              type: string
+ *                      required:
+ *                          - threadID
+ *                          - userID
+ *                          - body
+ *      tags: [Posts]
+ *      responses:
+ *          200:
+ *              description: Returns the userID of the newly created user
+ *          404:
+ *              description: Failed login
+ *              
+ */
 router.post('/posts', async (req, res) => {
     try {
         const body = req.body
@@ -351,20 +546,39 @@ router.post('/posts', async (req, res) => {
         const queryString = `INSERT INTO Posts (threadID, userID, replyID, body) VALUES 
             ('${threadID}', '${userID}','${replyID}','${text}')`
         const rows = await connection.execute(queryString);
-        res.send(JSON.stringify(rows[0]))
+        res.status(200).send({postID: rows[0].insertId})
         connection.release();
     } catch (err) {
         res.status(500).json({ error: err?.message });
     }
 });
 
-//Delete a post by ID
+/**
+ * @swagger
+ * /posts/{id}:
+ *  delete:
+ *      summary: Deletes a post by its ID
+ *      parameters:
+ *        - in: path
+ *          name: id
+ *          type: integer
+ *          required: true
+ *          description: The ID of the post
+ *              
+ *      tags: [Posts]
+ *      responses:
+ *          200:
+ *              description: Success message
+ *          500:
+ *              description: Error
+ *              
+ */
 router.delete('/posts/:id', async (req, res) => {
     try {
         const connection = await pool.getConnection();
         const queryString = `DELETE FROM Posts WHERE postID = ${req.params.id}`
         const rows = await connection.execute(queryString);
-        res.send(JSON.stringify(rows[0]))
+        res.status(200).send({Success: "Post " + req.params.id + " successfully deleted"})
         connection.release();
     } catch (err) {
         res.status(500).json({ error: err?.message });
