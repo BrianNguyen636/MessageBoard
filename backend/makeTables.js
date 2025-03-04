@@ -5,9 +5,11 @@ async function main() {
         const connection = await pool.getConnection();
         console.log('Connected to MySQL database!');
 
-        // LEAVE COMMENTED OUT IF RUNNING FOR THE FIRST TIME
+
         // IF REMAKING THE TABLES UNCOMMENT
-        await dropConstraints(connection);
+        // LEAVE COMMENTED OUT IF RUNNING FOR THE FIRST TIME
+        
+        // await dropConstraints(connection);
         await makeUsers(connection);
         console.log('User table created.')
         await makeThreads(connection);

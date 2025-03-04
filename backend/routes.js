@@ -1,9 +1,15 @@
 import express from 'express';
 import pool from './database.js';
 
+
+
 const router = express.Router();
 router.use(express.json());
 
+
+/**
+ * Grabs the pool connection to the Azure SQL database
+ */
 try {
     const connection = await pool.getConnection();
     console.log('Connected to MySQL database!');
@@ -14,7 +20,21 @@ try {
 }
 
 
-//get all users
+/**
+ * @swagger
+ * tags:
+ *  name: Users
+ * /users:
+ *  get:
+ *      summary: Get all users
+ *      tags: [Users]
+ *      responses:
+ *          200:
+ *              description: The list of user objects
+ *          500:
+ *              description: Error
+ *              
+ */
 router.get('/users', async (req, res) => {
   try {
     const connection = await pool.getConnection();
@@ -25,19 +45,72 @@ router.get('/users', async (req, res) => {
     res.status(500).json({ error: err?.message });
   }
 });
-//get user by their id
+
+/**
+ * @swagger
+ * /users/{id}:
+ *  get:
+ *      summary: Get a user by their ID
+ *      parameters:
+ *        - in: path
+ *          name: id
+ *          type: integer
+ *          required: true
+ *          description: The ID of the user
+ *              
+ *      tags: [Users]
+ *      responses:
+ *          200:
+ *              description: The user objects
+ *          404:
+ *              description: User not found
+ *          500:
+ *              description: Error
+ *              
+ */
 router.get('/users/:id', async (req, res) => {
     try {
       const connection = await pool.getConnection();
       const [rows] = await connection.execute('SELECT * FROM Users where userID=' + req.params.id)
-      res.send(JSON.stringify(rows[0]))
+      if (rows.length > 0) {
+        res.send(JSON.stringify(rows[0]))
+      } else {
+        res.status(404).send({error: "User not found"})
+      }
       connection.release();
     } catch (err) {
       res.status(500).json({ error: err?.message });
     }
 });
-//Login to a user account with username and password
-router.get('/login', async (req, res) => {
+
+/**
+ * @swagger
+ * /login:
+ *  post:
+ *      summary: Attempt a login
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          username:
+ *                              type: string
+ *                          password:
+ *                              type: string
+ *                      required:
+ *                          - username
+ *                          - password
+ *      tags: [Users]
+ *      responses:
+ *          200:
+ *              description: Successful login returns userID
+ *          404:
+ *              description: Failed login
+ *              
+ */
+router.post('/login', async (req, res) => {
     try {
         const username = req.body.username;
         const password = req.body.password;
@@ -55,37 +128,100 @@ router.get('/login', async (req, res) => {
     }
 });
 
-//get all posts by a user by their id
+/**
+ * @swagger
+ * /users/{id}/posts:
+ *  get:
+ *      summary: Get all a Users' posts by their ID
+ *      parameters:
+ *        - in: path
+ *          name: id
+ *          type: integer
+ *          required: true
+ *          description: The ID of the user
+ *              
+ *      tags: [Users]
+ *      responses:
+ *          200:
+ *              description: All the posts by the user
+ *          500:
+ *              description: Error
+ *              
+ */
 router.get('/users/:id/posts', async (req, res) => {
     try {
       const connection = await pool.getConnection();
       const [rows] = await connection.execute('SELECT * FROM Posts where userID=' + req.params.id)
-      res.send(JSON.stringify(rows[0]))
+      res.send(JSON.stringify(rows))
       connection.release();
     } catch (err) {
       res.status(500).json({ error: err?.message });
     }
 });
-
-//CREATE USER FROM BODY
+/**
+ * @swagger
+ * /users:
+ *  post:
+ *      summary: Create a user
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          username:
+ *                              type: string
+ *                          password:
+ *                              type: string
+ *                      required:
+ *                          - username
+ *                          - password
+ *      tags: [Users]
+ *      responses:
+ *          200:
+ *              description: Returns the userID of the newly created user
+ *          404:
+ *              description: Failed login
+ *              
+ */
 router.post('/users', async (req, res) => {
     try {
         const username = req.body.username;
         const password = req.body.password;
         const connection = await pool.getConnection();
         const rows = await connection.execute(`INSERT INTO Users (username, password) VALUES ( \"`+ username + `\",\"` + password + `\")`)
-        res.send(JSON.stringify(rows[0]))
+        res.status(200).send({userID: rows[0].insertId})
         connection.release();
     } catch (err) {
         res.status(500).json({ error: err?.message });
     }
 });
-//DELETE USER BY ID
+/**
+ * @swagger
+ * /users/{id}:
+ *  delete:
+ *      summary: Deletes a user by their ID
+ *      parameters:
+ *        - in: path
+ *          name: id
+ *          type: integer
+ *          required: true
+ *          description: The ID of the user
+ *              
+ *      tags: [Users]
+ *      responses:
+ *          200:
+ *              description: Success message
+ *          500:
+ *              description: Error
+ *              
+ */
 router.delete('/users/:id', async (req, res) => {
     try {
         const connection = await pool.getConnection();
         const rows = await connection.execute(`DELETE FROM Users where userID = ` + req.params.id)
-        res.send(JSON.stringify(rows[0]))
+        res.status(200).send({Success: "User " + req.params.id + " successfully deleted"})
         connection.release();
     } catch (err) {
         res.status(500).json({ error: err?.message });
