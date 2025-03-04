@@ -67,7 +67,7 @@ router.get('/users', async (req, res) => {
  *          500:
  *              description: Error
  *              
- *
+ */
 router.get('/users/:id', async (req, res) => {
     try {
       const connection = await pool.getConnection();
