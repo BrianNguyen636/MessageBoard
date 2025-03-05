@@ -2,6 +2,8 @@ import React from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
 import ThreadPage from './components/ThreadPage';
+import PostPage from './components/PostPage';
+
 import Login from './components/Login';
 import Signup from './components/Signup';
 import CreateThread from './components/CreateThread';
@@ -36,6 +38,7 @@ function App() {
           <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/thread/:id" element={<ThreadPage />} />
+          <Route path="/post/:id" element={<PostPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/create-thread" element={<CreateThread />} />

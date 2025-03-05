@@ -5,29 +5,32 @@ import { useAuth } from '../context/AuthContext';
 
 function ThreadPage() {
     const { id } = useParams(); // threadID
-    const location = useLocation(); // to get thread title passed from LandingPage
+    const location = useLocation(); // Get thread title from LandingPage
     const navigate = useNavigate();
     const { user } = useAuth();
     const [posts, setPosts] = useState([]);
 
     // Get the thread title from location.state (passed from LandingPage) or default to "Thread {id}"
     const threadTitle = location.state?.title || `Thread ${id}`;
-
+    console.log("TITLE")
+    console.log(threadTitle)
     useEffect(() => {
         fetchThreadPosts(id)
-            .then(data => setPosts(data))
+            .then(data => {
+                console.log("Fetched Posts Data:", data);
+                setPosts(data);
+            })
             .catch(err => console.error("Error fetching posts:", err));
     }, [id]);
 
-    // Navigate to create-post page for replying to the entire thread (no replyID)
-    const handleCreatePost = () => {
-        if (!user) {
-            navigate('/login');
-        } else {
-            navigate(`/thread/${id}/create-post`, {
-                state: { title: threadTitle }
-            });
-        }
+    const buttonClick = (event) => {
+        event.stopPropagation();
+    };
+
+    // Navigate to PostPage when clicking on a post
+    const handleViewPost = (post) => {
+        console.log(post)
+        navigate(`/post/${post.postID}`, { state: { selectedPost: post, threadTitle:threadTitle,  threadID: id } });
     };
 
     // Navigate to create-post page for replying to a specific post
@@ -45,34 +48,53 @@ function ThreadPage() {
     const handleDeletePost = async (postID) => {
         try {
             await deletePost(postID);
-            // Remove the deleted post from the local state to update the UI
             setPosts(prevPosts => prevPosts.filter(post => post.postID !== postID));
         } catch (err) {
             console.error('Error deleting post:', err);
         }
     };
 
+    //filter out posts with replyID == first post .postID
+    const firstPostID = posts.length > 0 ? posts[0].postID : null;
+    const filteredPosts = posts.filter(post => post.replyID === firstPostID);
+
+    console.log(filteredPosts)
+
     return (
         <div>
             <h2>{threadTitle}</h2>
-            <button onClick={handleCreatePost}>Reply to Thread</button>
+
+            {/* Show First Post as the Main Thread Body */}
+            {posts.length > 0 && (
+                <div style={{ 
+                    border: "2px solid #444", 
+                    backgroundColor: "#f9f9f9", 
+                    padding: "15px", 
+                    borderRadius: "10px", 
+                    marginBottom: "20px" 
+                }}>
+                    <p>{posts[0].body}</p>
+                    <p style={{ fontSize: "0.85rem", fontStyle: "italic", color: "#666", paddingTop: "5px" }}>
+                        Posted by User {posts[0].userID} at {new Date(posts[0].time).toLocaleString()}
+                    </p>
+                </div>
+            )}
+
+            <button onClick={() => handleReplyToPost(posts[0].postID)}>Reply to Thread</button>
+            <h3 style={{ paddingTop: "20px" }}>Comments</h3>
             <ul>
-                {posts.map(post => (
-                    <li key={post.postID}>
-                        <p>{post.body}</p>
-                        <p>
-                            <em>
+                {filteredPosts.slice(1).map(post => ( //  Only show non-reply posts
+                    <li key={post.postID} style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid #ddd' }}>
+                        <div onClick={() => handleViewPost(post)}>
+                            <p style={{ color: "blue", textDecoration: "underline" }}>{post.body}</p>
+                            <p style={{ fontSize: "0.85rem", fontStyle: "italic", color: "#666", paddingTop: "5px" }}>
                                 Posted by User {post.userID} at {new Date(post.time).toLocaleString()}
-                            </em>
-                        </p>
-                        <button onClick={() => handleReplyToPost(post.postID)}>
-                            Reply
-                        </button>
-                        {user && parseInt(user.userID) === post.userID && (
-                            <button onClick={() => handleDeletePost(post.postID)}>
-                                Delete
-                            </button>
-                        )}
+                            </p>
+                            <button onClick={(event) => { buttonClick(event); handleReplyToPost(post.postID); }}>Reply</button>
+                            {user && parseInt(user.userID) === post.userID && (
+                                <button onClick={(event) => { buttonClick(event); handleDeletePost(post.postID); }}>Delete</button>
+                            )}
+                        </div>
                     </li>
                 ))}
             </ul>
