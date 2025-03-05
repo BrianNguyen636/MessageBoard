@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createThread } from '../api';
-import { useAuth } from '../AuthContext';
+import { createThread } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 function CreateThread() {
     const [title, setTitle] = useState('');

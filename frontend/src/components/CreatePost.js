@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { createPost } from '../api';
-import { useAuth } from '../AuthContext';
+import { createPost } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 function CreatePost() {
     const { id, replyID } = useParams();       // threadID, optional replyID

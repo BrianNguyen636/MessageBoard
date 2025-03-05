@@ -6,9 +6,9 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import CreateThread from './components/CreateThread';
 import CreatePost from './components/CreatePost';
-import { useAuth } from './AuthContext';
+import { useAuth } from './context/AuthContext';
 
-import './App.css';
+import './styles/App.css';
 
 function App() {
   const { user, logout } = useAuth();

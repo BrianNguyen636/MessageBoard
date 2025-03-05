@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
-import { fetchThreadPosts, deletePost } from '../api';
-import { useAuth } from '../AuthContext';
+import { fetchThreadPosts, deletePost } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 function ThreadPage() {
     const { id } = useParams(); // threadID

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { signupUser } from '../api';
-import { useAuth } from '../AuthContext';
+import { signupUser } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 function Signup() {
     const [username, setUsername] = useState('');
