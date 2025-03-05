@@ -24,7 +24,9 @@ function ThreadPage() {
         if (!user) {
             navigate('/login');
         } else {
-            navigate(`/thread/${id}/create-post`);
+            navigate(`/thread/${id}/create-post`, {
+                state: { title: threadTitle }
+            });
         }
     };
 
@@ -33,7 +35,9 @@ function ThreadPage() {
         if (!user) {
             navigate('/login');
         } else {
-            navigate(`/thread/${id}/create-post/${postID}`);
+            navigate(`/thread/${id}/create-post/${postID}`, {
+                state: { title: threadTitle }
+            });
         }
     };
 
