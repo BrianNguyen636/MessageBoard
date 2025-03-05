@@ -543,10 +543,11 @@ router.post('/posts', async (req, res) => {
         const text = body.body
         const threadID = body.threadID
         const connection = await pool.getConnection();
-        const queryString = `INSERT INTO Posts (threadID, userID, replyID, body) VALUES 
-            ('${threadID}', '${userID}','${replyID}','${text}')`
-        const rows = await connection.execute(queryString);
-        res.status(200).send({postID: rows[0].insertId})
+        const [rows] = await connection.execute(
+            'INSERT INTO Posts (threadID, userID, replyID, body) VALUES (?, ?, ?, ?)',
+            [threadID, userID, replyID, text]
+        );
+        res.status(200).send({ postID: rows.insertId });
         connection.release();
     } catch (err) {
         res.status(500).json({ error: err?.message });
