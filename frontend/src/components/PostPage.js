@@ -50,7 +50,6 @@ function PostPage() {
     useEffect(() => {
         fetchUsers()
             .then(data => {
-                console.log("users Data:", data);
                 setUsers(data);
             })
             .catch(err => console.error("Error fetching users:", err));
@@ -91,7 +90,6 @@ function PostPage() {
     };
 
     const handleViewPost = (post) => {
-        console.log(post)
         navigate(`/post/${post.postID}`, { state: { selectedPost: post, threadTitle:threadTitle,  threadID: threadID } });
     };
 

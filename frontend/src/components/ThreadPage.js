@@ -14,12 +14,9 @@ function ThreadPage() {
 
     // Get the thread title from location.state (passed from LandingPage) or default to "Thread {id}"
     const threadTitle = location.state?.title || `Thread ${id}`;
-    console.log("TITLE")
-    console.log(threadTitle)
     useEffect(() => {
         fetchThreadPosts(id)
             .then(data => {
-                console.log("Fetched Posts Data:", data);
                 setPosts(data);
             })
             .catch(err => console.error("Error fetching posts:", err));
@@ -30,14 +27,10 @@ function ThreadPage() {
     useEffect(() => {
         fetchUsers()
             .then(data => {
-                console.log("users Data:", data);
                 setUsers(data);
             })
             .catch(err => console.error("Error fetching users:", err));
     }, []);
-    console.log(`Print out users`)
-    console.log(users)
-
     
     const getUsername = (userID) => {
         const user = users.find(u => u.userID === userID);
@@ -50,7 +43,6 @@ function ThreadPage() {
 
     // Navigate to PostPage when clicking on a post
     const handleViewPost = (post) => {
-        console.log(post)
         navigate(`/post/${post.postID}`, { state: { selectedPost: post, threadTitle:threadTitle,  threadID: id } });
     };
 
@@ -78,8 +70,6 @@ function ThreadPage() {
     //filter out posts with replyID == first post .postID
     const firstPostID = posts.length > 0 ? posts[0].postID : null;
     const filteredPosts = posts.filter(post => post.replyID === firstPostID);
-
-    console.log(filteredPosts)
 
     return (
         <div>
