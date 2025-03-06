@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
-import { fetchThreadPosts, deletePost } from '../services/api';
+import { fetchThreadPosts, deletePost, fetchUsers } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 function ThreadPage() {
@@ -9,6 +9,8 @@ function ThreadPage() {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [posts, setPosts] = useState([]);
+    const [users, setUsers] = useState([]);
+
 
     // Get the thread title from location.state (passed from LandingPage) or default to "Thread {id}"
     const threadTitle = location.state?.title || `Thread ${id}`;
@@ -22,6 +24,25 @@ function ThreadPage() {
             })
             .catch(err => console.error("Error fetching posts:", err));
     }, [id]);
+
+
+
+    useEffect(() => {
+        fetchUsers()
+            .then(data => {
+                console.log("users Data:", data);
+                setUsers(data);
+            })
+            .catch(err => console.error("Error fetching users:", err));
+    }, []);
+    console.log(`Print out users`)
+    console.log(users)
+
+    
+    const getUsername = (userID) => {
+        const user = users.find(u => u.userID === userID);
+        return user ? user.username : `User ${userID}`;
+    };
 
     const buttonClick = (event) => {
         event.stopPropagation();
@@ -75,7 +96,7 @@ function ThreadPage() {
                 }}>
                     <p>{posts[0].body}</p>
                     <p style={{ fontSize: "0.85rem", fontStyle: "italic", color: "#666", paddingTop: "5px" }}>
-                        Posted by User {posts[0].userID} at {new Date(posts[0].time).toLocaleString()}
+                        Posted by {getUsername(posts[0].userID)} at {new Date(posts[0].time).toLocaleString()}
                     </p>
                 </div>
             )}
@@ -83,12 +104,12 @@ function ThreadPage() {
             <button onClick={() => handleReplyToPost(posts[0].postID)}>Reply to Thread</button>
             <h3 style={{ paddingTop: "20px" }}>Comments</h3>
             <ul>
-                {filteredPosts.slice(1).map(post => ( //  Only show non-reply posts
+                {filteredPosts.map(post => ( //  Only show non-reply posts
                     <li key={post.postID} style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid #ddd' }}>
                         <div onClick={() => handleViewPost(post)}>
                             <p style={{ color: "blue", textDecoration: "underline" }}>{post.body}</p>
                             <p style={{ fontSize: "0.85rem", fontStyle: "italic", color: "#666", paddingTop: "5px" }}>
-                                Posted by User {post.userID} at {new Date(post.time).toLocaleString()}
+                                Posted by {getUsername(post.userID)} at {new Date(post.time).toLocaleString()}
                             </p>
                             <button onClick={(event) => { buttonClick(event); handleReplyToPost(post.postID); }}>Reply</button>
                             {user && parseInt(user.userID) === post.userID && (

@@ -10,6 +10,12 @@ export async function fetchThreadPosts(threadId) {
     return res.json();
 }
 
+
+export async function fetchUsers() {
+    const res = await fetch(`${API_URL}/users`);
+    return res.json();
+}
+
 export async function loginUser(username, password) {
     const res = await fetch(`${API_URL}/login`, {
         method: 'POST',

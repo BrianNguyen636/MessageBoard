@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { fetchThreadPosts, deletePost } from '../services/api';
+import { fetchThreadPosts, deletePost, fetchUsers } from '../services/api';
 
 function PostPage() {
     const { id } = useParams(); // postID
@@ -14,6 +14,8 @@ function PostPage() {
     const [posts, setPosts] = useState([]);
     const [threadID, setThreadID] = useState(location.state?.threadID || null);
     const [threadTitle, setThreadTitle] = useState(location.state?.threadTitle || "Thread");
+    const [users, setUsers] = useState([]);
+    
 
     useEffect(() => {
         fetchThreadPosts(threadID)
@@ -42,6 +44,23 @@ function PostPage() {
                 .catch(err => console.error("Error fetching post:", err));
         }
     }, [id, location.state]);
+
+
+    
+    useEffect(() => {
+        fetchUsers()
+            .then(data => {
+                console.log("users Data:", data);
+                setUsers(data);
+            })
+            .catch(err => console.error("Error fetching users:", err));
+    }, []);
+
+    
+    const getUsername = (userID) => {
+        const user = users.find(u => u.userID === userID);
+        return user ? user.username : `User ${userID}`;
+    };
     
 
     // Get replies by filtering posts where replyID matches the current post ID
@@ -85,7 +104,7 @@ function PostPage() {
                 <div style={{ border: "1px solid #ddd", padding: "15px", borderRadius: "8px", marginBottom: "20px" }}>
                     <p style={{ fontSize: "1.2rem", fontWeight: "bold" }}>{post.body}</p>
                     <p>
-                        <em>Posted by User {post.userID} at {new Date(post.time).toLocaleString()}</em>
+                        <em>Posted by {getUsername(post.userID)} at {new Date(post.time).toLocaleString()}</em>
                     </p>
                     <button onClick={() => handleReplyToPost(post.postID)}>Reply</button>
                     {user && parseInt(user.userID) === post.userID && (
@@ -103,7 +122,7 @@ function PostPage() {
                         <div onClick={() => handleViewPost(reply)}>
                             <p style={{ color: "blue", textDecoration: "underline" }}>{reply.body}</p>
                             <p>
-                                <em>Posted by User {reply.userID} at {new Date(reply.time).toLocaleString()}</em>
+                                <em>Posted by {getUsername(reply.userID)} at {new Date(reply.time).toLocaleString()}</em>
                             </p>
                         </div>
                         <button onClick={() => handleReplyToPost(reply.postID)}>Reply</button>
