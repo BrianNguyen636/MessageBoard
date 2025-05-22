@@ -34,6 +34,9 @@ function CreatePost() {
         }
     };
 
+    
+    
+
     return (
         <div>
             <h2>Reply to: {threadTitle}</h2>
